@@ -1,0 +1,49 @@
+/* GBA.js SP — couleurs de coque supplémentaires (menu déroulant) */
+
+body[data-shell="graphite"]   { --shell: #4a4d55; --ink: rgba(255,255,255,.75); --btn: #2a2b30; }
+body[data-shell="perle-bleu"] { --shell: #a9cbe8; --ink: #3f5f7d;               --btn: #2e3440; }
+body[data-shell="vert"]       { --shell: #2f8f4e; --ink: rgba(255,255,255,.8);  --btn: #1f2622; }
+body[data-shell="orange"]     { --shell: #e8742a; --ink: rgba(255,255,255,.85); --btn: #24211f; }
+body[data-shell="jaune"]      { --shell: #f2c230; --ink: #6b5410;               --btn: #2a2620; }
+body[data-shell="violet"]     { --shell: #6b3fa0; --ink: rgba(255,255,255,.8);  --btn: #221d2b; }
+body[data-shell="turquoise"]  { --shell: #2bb5b0; --ink: #0f4a48;               --btn: #1e2a2a; }
+body[data-shell="blanc"]      { --shell: #eeeeea; --ink: #5a5d63;               --btn: #2b2c32; }
+body[data-shell="bordeaux"]   { --shell: #6e1a2b; --ink: rgba(255,255,255,.75); --btn: #1f1a1c; }
+body[data-shell="kaki"]       { --shell: #6b6b3a; --ink: rgba(255,255,255,.75); --btn: #23241c; }
+
+.swatch[data-shell="graphite"]   { background: #4a4d55; }
+.swatch[data-shell="perle-bleu"] { background: #a9cbe8; }
+.swatch[data-shell="vert"]       { background: #2f8f4e; }
+.swatch[data-shell="orange"]     { background: #e8742a; }
+.swatch[data-shell="jaune"]      { background: #f2c230; }
+.swatch[data-shell="violet"]     { background: #6b3fa0; }
+.swatch[data-shell="turquoise"]  { background: #2bb5b0; }
+.swatch[data-shell="blanc"]      { background: #eeeeea; }
+.swatch[data-shell="bordeaux"]   { background: #6e1a2b; }
+.swatch[data-shell="kaki"]       { background: #6b6b3a; }
+
+.coque-plus { margin-top: 2px; }
+.coque-plus summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	-webkit-user-select: none;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--muted);
+	padding: 4px 0;
+	width: max-content;
+}
+.coque-plus summary::-webkit-details-marker { display: none; }
+.coque-plus summary::after {
+	content: "▾";
+	display: inline-block;
+	margin-left: 6px;
+	transition: transform .2s;
+}
+.coque-plus[open] summary::after { transform: rotate(180deg); }
+.coque-plus summary:hover { color: var(--text); }
+.coque-plus .swatches {
+	flex-wrap: wrap;
+	padding-top: 8px;
+}

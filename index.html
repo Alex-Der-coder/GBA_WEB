@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14151a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>GBA.js SP</title>
+<link rel="stylesheet" href="resources/main.css">
+<link rel="stylesheet" href="resources/coque-extra.css">
+<script src="js/util.js"></script>
+<script src="js/core.js"></script>
+<script src="js/arm.js"></script>
+<script src="js/thumb.js"></script>
+<script src="js/mmu.js"></script>
+<script src="js/io.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/video.js"></script>
+<script src="js/video/proxy.js"></script>
+<script src="js/video/software.js"></script>
+<script src="js/irq.js"></script>
+<script src="js/keypad.js"></script>
+<script src="js/sio.js"></script>
+<script src="js/savedata.js"></script>
+<script src="js/gpio.js"></script>
+<script src="js/gba.js"></script>
+<script src="resources/xhr.js"></script>
+<script src="resources/coque-extra.js" defer></script>
+<script src="resources/sp.js" defer></script>
+</head>
+<body data-shell="cobalt">
+
+<main class="stage">
+
+	<!-- ============ CONSOLE ============ -->
+	<div class="sp" id="sp">
+
+		<!-- Couvercle : écran -->
+		<section class="lid">
+			<div class="bezel">
+				<div class="screen" id="screenWrap">
+					<canvas id="screen" width="240" height="160"></canvas>
+					<button class="insert" id="insert" type="button">
+						<span class="cart" aria-hidden="true"></span>
+						<span class="insert-text" id="insertText">Touchez pour insérer une cartouche</span>
+						<span class="insert-sub">fichier .gba</span>
+					</button>
+					<div class="toast" id="toast" role="status" aria-live="polite"></div>
+				</div>
+				<div class="brand"><span class="brand-main">GBA</span><span class="brand-js">.js</span><span class="brand-sp">SP</span></div>
+			</div>
+		</section>
+
+		<!-- Charnière -->
+		<div class="hinge" aria-hidden="true">
+			<span class="hinge-barrel"></span>
+		</div>
+
+		<!-- Base : contrôles -->
+		<section class="base">
+			<button class="shoulder shoulder-l" data-key="L" type="button" aria-label="Gâchette L"><span>L</span></button>
+			<button class="shoulder shoulder-r" data-key="R" type="button" aria-label="Gâchette R"><span>R</span></button>
+
+			<div class="leds" aria-hidden="true">
+				<span class="led led-power" id="ledPower"></span>
+				<span class="led-label">POWER</span>
+			</div>
+
+			<button class="light-btn" id="lightBtn" type="button" aria-label="Éclairage de l'écran" aria-pressed="true">
+				<span class="sun" aria-hidden="true"></span>
+			</button>
+
+			<div class="dpad" id="dpad" role="group" aria-label="Croix directionnelle">
+				<span class="dpad-arm dpad-v"></span>
+				<span class="dpad-arm dpad-h"></span>
+				<span class="dpad-dot"></span>
+				<i class="dpad-hint up"></i><i class="dpad-hint down"></i><i class="dpad-hint left"></i><i class="dpad-hint right"></i>
+			</div>
+
+			<div class="ab">
+				<button class="face face-b" data-key="B" type="button" aria-label="Bouton B"><span>B</span></button>
+				<button class="face face-a" data-key="A" type="button" aria-label="Bouton A"><span>A</span></button>
+			</div>
+
+			<div class="pill-group pill-select">
+				<button class="pill" data-key="SELECT" type="button" aria-label="Select"></button>
+				<span class="pill-label">SELECT</span>
+			</div>
+			<div class="pill-group pill-start">
+				<button class="pill" data-key="START" type="button" aria-label="Start"></button>
+				<span class="pill-label">START</span>
+			</div>
+
+			<div class="speaker" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+			<button class="menu-btn" id="menuBtn" type="button" aria-controls="panel" aria-expanded="false">
+				<span class="menu-ico" aria-hidden="true"></span><span class="menu-label">MENU</span>
+			</button>
+		</section>
+	</div>
+
+	<!-- ============ PANNEAU / MENU ============ -->
+	<aside class="panel" id="panel" aria-label="Options">
+		<header class="panel-head">
+			<h1>GBA<span>.js</span> <small>SP</small></h1>
+			<button class="panel-close" id="panelClose" type="button" aria-label="Fermer le menu">✕</button>
+		</header>
+
+		<div class="panel-body">
+			<div class="group">
+				<h2>Cartouche</h2>
+				<button class="btn btn-primary" id="btnLoad" type="button">Charger une ROM</button>
+				<button class="btn" id="btnShare" type="button" disabled>Partager la sauvegarde (lien)</button>
+				<button class="btn" id="btnSaveUp" type="button">Importer un fichier .sav</button>
+			</div>
+
+			<div class="group">
+				<h2>Partie</h2>
+				<div class="row">
+					<button class="btn" id="btnPause" type="button" disabled>Pause</button>
+					<button class="btn" id="btnReset" type="button" disabled>Reset</button>
+				</div>
+				<div class="row">
+					<button class="btn" id="btnEject" type="button" disabled>Éjecter</button>
+					<button class="btn" id="btnShot" type="button" disabled>Capture</button>
+				</div>
+				<button class="btn" id="btnFull" type="button">Plein écran</button>
+			</div>
+
+			<div class="group">
+				<h2>Affichage &amp; son</h2>
+				<label class="toggle"><input type="checkbox" id="optPixel" checked><span>Pixels nets</span></label>
+				<label class="toggle"><input type="checkbox" id="optHaptic" checked><span>Vibration tactile</span></label>
+				<label class="toggle" id="soundRow"><input type="checkbox" id="optSound" checked><span>Son</span></label>
+				<input class="range" type="range" id="optVolume" min="0" max="1" value="1" step="any" aria-label="Volume">
+			</div>
+
+			<div class="group">
+				<h2>Coque</h2>
+				<div class="swatches" id="swatches" role="radiogroup" aria-label="Couleur de la coque">
+					<button type="button" class="swatch" data-shell="cobalt" title="Cobalt" aria-label="Cobalt"></button>
+					<button type="button" class="swatch" data-shell="flame" title="Flamme" aria-label="Flamme"></button>
+					<button type="button" class="swatch" data-shell="platinum" title="Platine" aria-label="Platine"></button>
+					<button type="button" class="swatch" data-shell="onyx" title="Onyx" aria-label="Onyx"></button>
+					<button type="button" class="swatch" data-shell="pearl" title="Perle" aria-label="Perle"></button>
+				</div>
+				<!-- « Plus de couleurs » est ajouté ici par resources/coque-extra.js -->
+			</div>
+
+			<div class="group keys">
+				<h2>Clavier</h2>
+				<dl>
+					<dt>← ↑ → ↓</dt><dd>Croix</dd>
+					<dt>Z</dt><dd>A</dd>
+					<dt>X</dt><dd>B</dd>
+					<dt>A</dt><dd>L</dd>
+					<dt>S</dt><dd>R</dd>
+					<dt>Entrée</dt><dd>Start</dd>
+					<dt>\</dt><dd>Select</dd>
+				</dl>
+			</div>
+		</div>
+	</aside>
+	<div class="scrim" id="scrim" hidden></div>
+</main>
+
+<dialog class="share" id="shareDialog" aria-labelledby="shareTitle">
+	<form method="dialog" class="share-inner">
+		<h2 id="shareTitle">Lien de sauvegarde</h2>
+		<p class="share-desc" id="shareDesc">Ouvre ce lien sur n'importe quel appareil, insère la même cartouche : la partie reprend là où tu l'as laissée.</p>
+		<textarea id="shareUrl" readonly rows="4" spellcheck="false"></textarea>
+		<p class="share-meta" id="shareMeta"></p>
+		<div class="row">
+			<button class="btn btn-primary" id="shareCopy" type="button">Copier le lien</button>
+			<button class="btn" id="shareNative" type="button" hidden>Partager…</button>
+		</div>
+		<button class="btn share-close" value="close">Fermer</button>
+	</form>
+</dialog>
+
+<input id="loader" type="file" accept=".gba,.agb,.bin" hidden>
+<input id="saveloader" type="file" accept=".sav,.srm,.bin" hidden>
+
+<script>
+// Instance globale : debugger.html y accède via window.opener.gba
+var gba = null;
+var debug = null;
+try {
+	gba = new GameBoyAdvance();
+	gba.keypad.eatInput = true;
+} catch (exception) {
+	gba = null;
+}
+</script>
+</body>
+</html>
